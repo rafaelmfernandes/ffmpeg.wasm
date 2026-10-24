@@ -122,8 +122,12 @@ RUN bash -x /src/build.sh \
     \
     --enable-filter=null \
     --enable-filter=format \
-    --enable-filter=scale
-
+    --enable-filter=scale \
+    --enable-filter=trim \
+    --enable-filter=atrim \
+    --enable-filter=setpts \
+    --enable-filter=asetpts \
+    --enable-filter=aresample
 # ---------------------------------------------------------
 # 4. Gerar o núcleo JavaScript/WebAssembly
 # ---------------------------------------------------------
