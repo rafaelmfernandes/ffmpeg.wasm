@@ -103,6 +103,8 @@ RUN bash -x /src/build.sh \
     --enable-demuxer=wav \
     --enable-demuxer=aac \
     \
+    --enable-muxer=mp4 \
+    \
     --enable-parser=h264 \
     --enable-parser=hevc \
     --enable-parser=mpeg4video \
