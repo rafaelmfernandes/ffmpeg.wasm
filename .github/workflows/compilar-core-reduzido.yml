@@ -9,24 +9,67 @@ permissions:
 
 jobs:
   compilar:
+    name: Compilar e verificar o FFmpeg
     runs-on: ubuntu-22.04
+
     steps:
       - name: Baixar o repositório
         uses: actions/checkout@v4
 
-      - name: Preparar Node.js
-        uses: actions/setup-node@v4
+      - name: Preparar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Compilar o núcleo reduzido
+        id: build
+        uses: docker/build-push-action@v6
         with:
-          node-version: 20
+          context: .
+          file: Dockerfile.reduzido
+          target: exportor
+          outputs: type=local,dest=./resultado
+          provenance: false
 
-      - name: Verificar ferramentas disponíveis
+      - name: Verificar arquivos e tamanho do WASM
+        if: success()
         run: |
-          node --version
-          npm --version
-          git --version
+          set -euo pipefail
 
-      - name: Mostrar instruções de compilação
-        run: |
-          echo "Repositório preparado."
-          echo "A compilação personalizada será configurada na próxima etapa."
-          echo "Nenhum arquivo original foi alterado."
+          echo "Arquivos gerados:"
+          find resultado -type f -print
+
+          WASM="$(find resultado -type f -name 'ffmpeg-core.wasm' -print -quit)"
+
+          if [ -z "$WASM" ]; then
+            echo "::error::O arquivo ffmpeg-core.wasm não foi encontrado."
+            exit 1
+          fi
+
+          BYTES="$(stat -c%s "$WASM")"
+          MIB="$(awk -v bytes="$BYTES" 'BEGIN { printf "%.2f", bytes / 1048576 }')"
+
+          echo "Arquivo: $WASM"
+          echo "Tamanho: $BYTES bytes ($MIB MiB)"
+
+          if [ "$BYTES" -lt 26214400 ]; then
+            echo "O WASM está abaixo de 25 MiB."
+          else
+            echo "::warning::O WASM ainda está no limite ou acima de 25 MiB."
+          fi
+
+          JS="$(find resultado -type f -name 'ffmpeg-core.js' -print -quit)"
+
+          if [ -z "$JS" ]; then
+            echo "::error::O arquivo ffmpeg-core.js não foi encontrado."
+            exit 1
+          fi
+
+          echo "O JavaScript do núcleo também foi encontrado."
+
+      - name: Disponibilizar arquivos compilados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: musicalworld-ffmpeg-core-reduzido
+          path: resultado/
+          if-no-files-found: warn
+          retention-days: 7
