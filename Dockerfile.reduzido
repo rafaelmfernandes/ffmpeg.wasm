@@ -2,12 +2,16 @@
 # =========================================================
 # MUSICALWORLD — FFmpeg WASM REDUZIDO
 #
-# Compilação pelo GitHub Actions.
-# Objetivo:
-# - Manter o núcleo abaixo de 25 MiB.
-# - Suportar os formatos de vídeo mais comuns.
-# - Ampliar o suporte a codecs de áudio.
-# - Gerar ffmpeg-core.js e ffmpeg-core.wasm.
+# Objetivos:
+# - Preparar vídeos de até 45 segundos ou mais, conforme
+#   o corte solicitado pela aplicação.
+# - Codificar vídeo H.264 e áudio AAC em MP4.
+# - Ampliar a leitura de formatos comuns de vídeo e áudio.
+# - Incluir os filtros utilizados no corte e na conversão.
+# - Manter o WebAssembly abaixo de 25 MiB, se possível.
+#
+# IMPORTANTE:
+# O tamanho final precisa ser conferido após a compilação.
 # =========================================================
 
 FROM emscripten/emsdk:3.1.40 AS emsdk-base
@@ -54,7 +58,7 @@ ADD https://github.com/FFmpeg/FFmpeg.git#n5.1.4 /src
 COPY --from=x264-builder /opt /opt
 
 # ---------------------------------------------------------
-# 3. Compilar somente os componentes necessários
+# 3. Compilar os componentes necessários
 # ---------------------------------------------------------
 
 FROM ffmpeg-base AS ffmpeg-builder
@@ -72,9 +76,22 @@ RUN bash -x /src/build.sh \
     --enable-decoder=h264 \
     --enable-decoder=hevc \
     --enable-decoder=mpeg4 \
+    --enable-decoder=mpeg1video \
+    --enable-decoder=mpeg2video \
+    --enable-decoder=h263 \
     --enable-decoder=mjpeg \
+    --enable-decoder=png \
+    --enable-decoder=gif \
+    --enable-decoder=bmp \
+    --enable-decoder=webp \
+    --enable-decoder=prores \
+    --enable-decoder=flv \
     --enable-decoder=vp8 \
     --enable-decoder=vp9 \
+    --enable-decoder=wmv1 \
+    --enable-decoder=wmv2 \
+    --enable-decoder=vc1 \
+    --enable-decoder=theora \
     --enable-decoder=aac \
     --enable-decoder=mp3 \
     --enable-decoder=mp3float \
@@ -84,31 +101,55 @@ RUN bash -x /src/build.sh \
     --enable-decoder=alac \
     --enable-decoder=ac3 \
     --enable-decoder=eac3 \
+    --enable-decoder=dca \
+    --enable-decoder=truehd \
     --enable-decoder=pcm_s16le \
+    --enable-decoder=pcm_s16be \
     --enable-decoder=pcm_s24le \
+    --enable-decoder=pcm_s24be \
     --enable-decoder=pcm_s32le \
+    --enable-decoder=pcm_s32be \
     --enable-decoder=pcm_u8 \
+    --enable-decoder=pcm_f32le \
+    --enable-decoder=pcm_f64le \
     --enable-decoder=wmav1 \
     --enable-decoder=wmav2 \
+    --enable-decoder=wmalossless \
+    --enable-decoder=wmapro \
     \
     --enable-demuxer=mov \
     --enable-demuxer=matroska \
     --enable-demuxer=avi \
+    --enable-demuxer=flv \
+    --enable-demuxer=asf \
     --enable-demuxer=mpeg \
     --enable-demuxer=mpegts \
+    --enable-demuxer=h264 \
+    --enable-demuxer=hevc \
+    --enable-demuxer=avi \
     --enable-demuxer=image2 \
+    --enable-demuxer=image2pipe \
     --enable-demuxer=ogg \
     --enable-demuxer=flac \
     --enable-demuxer=mp3 \
     --enable-demuxer=wav \
     --enable-demuxer=aac \
+    --enable-demuxer=ac3 \
+    --enable-demuxer=dts \
+    --enable-demuxer=amr \
+    --enable-demuxer=ape \
+    --enable-demuxer=wv \
+    --enable-demuxer=rawvideo \
     \
     --enable-muxer=mp4 \
     \
     --enable-parser=h264 \
     --enable-parser=hevc \
     --enable-parser=mpeg4video \
+    --enable-parser=mpegvideo \
+    --enable-parser=h263 \
     --enable-parser=mjpeg \
+    --enable-parser=png \
     --enable-parser=vp8 \
     --enable-parser=vp9 \
     --enable-parser=aac \
@@ -117,6 +158,7 @@ RUN bash -x /src/build.sh \
     --enable-parser=vorbis \
     --enable-parser=flac \
     --enable-parser=ac3 \
+    --enable-parser=dca \
     \
     --enable-protocol=file \
     \
@@ -148,6 +190,7 @@ RUN bash -x /src/build.sh \
     --enable-filter=amerge \
     --enable-filter=abuffer \
     --enable-filter=abuffersink
+
 # ---------------------------------------------------------
 # 4. Gerar o núcleo JavaScript/WebAssembly
 # ---------------------------------------------------------
