@@ -122,13 +122,32 @@ RUN bash -x /src/build.sh \
     \
     --enable-filter=null \
     --enable-filter=anull \
-    --enable-filter=format \
-    --enable-filter=scale \
     --enable-filter=trim \
     --enable-filter=atrim \
     --enable-filter=setpts \
     --enable-filter=asetpts \
-    --enable-filter=aresample
+    --enable-filter=scale \
+    --enable-filter=format \
+    --enable-filter=aformat \
+    --enable-filter=fps \
+    --enable-filter=setsar \
+    --enable-filter=transpose \
+    --enable-filter=crop \
+    --enable-filter=pad \
+    --enable-filter=split \
+    --enable-filter=asplit \
+    --enable-filter=concat \
+    --enable-filter=colorspace \
+    --enable-filter=aresample \
+    --enable-filter=volume \
+    --enable-filter=pan \
+    --enable-filter=amix \
+    --enable-filter=adelay \
+    --enable-filter=apad \
+    --enable-filter=asetnsamples \
+    --enable-filter=amerge \
+    --enable-filter=abuffer \
+    --enable-filter=abuffersink
 # ---------------------------------------------------------
 # 4. Gerar o núcleo JavaScript/WebAssembly
 # ---------------------------------------------------------
