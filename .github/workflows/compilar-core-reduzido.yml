@@ -1,0 +1,32 @@
+
+name: Compilar FFmpeg WASM reduzido
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compilar:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verificar ferramentas disponíveis
+        run: |
+          node --version
+          npm --version
+          git --version
+
+      - name: Mostrar instruções de compilação
+        run: |
+          echo "Repositório preparado."
+          echo "A compilação personalizada será configurada na próxima etapa."
+          echo "Nenhum arquivo original foi alterado."
