@@ -121,6 +121,7 @@ RUN bash -x /src/build.sh \
     --enable-protocol=file \
     \
     --enable-filter=null \
+    --enable-filter=anull \
     --enable-filter=format \
     --enable-filter=scale \
     --enable-filter=trim \
